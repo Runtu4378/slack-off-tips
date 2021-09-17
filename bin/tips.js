@@ -13,6 +13,9 @@ dayjs.locale('zh-cn')
 const customParseFormat = require('dayjs/plugin/customParseFormat')
 dayjs.extend(customParseFormat)
 
+var isBetween = require('dayjs/plugin/isBetween')
+dayjs.extend(isBetween)
+
 const API = 'https://api.apihubs.cn/holiday/get'
 const COMMAND_SHOW = 'show'
 
@@ -33,23 +36,11 @@ function generateDateRange(dateStart, length, unit = 'day') {
 }
 
 function getTimeDiff (start, end, unit = 'day') {
-  const baseReset = {
-    hour: 0,
-    minute: 0,
-    second: 0,
-    millisecond: 0,
-  }
   let diff = 0
 
   switch (unit) {
     case 'day': {
-      const startDate = start.set(baseReset)
-      const endDate = end.set(baseReset)
-
-      logger('startDate: ', startDate)
-      logger('endDate: ', endDate)
-
-      diff = endDate.diff(startDate, 'day')
+      diff = end.diff(start, 'day') - 1
       break;
     }
   }
@@ -96,12 +87,13 @@ async function getNextWeekend (today) {
 async function getHoliday (today) {
   const holidayArr = []
 
-  const nextHalfYearMonth = generateDateRange(today, 6, 'month').map(i => i.format('YYYYMM'))
-  logger('获取下半年假日的日期范围', nextHalfYearMonth)
+  const nextHalfYearMonth = generateDateRange(today, 6, 'month')
+  const month = nextHalfYearMonth.map(i => i.format('YYYYMM'))
+  logger('获取下半年假日的日期范围', month)
   const resp = await axios.get(API, {
     params: {
       // 日期范围
-      month: nextHalfYearMonth.join(','),
+      month: month.join(','),
       // 只显示节假日假日
       holiday_recess: 1,
       // 升序
@@ -124,9 +116,40 @@ async function getHoliday (today) {
         holidayArr.push([
           dayjs(`${item.date}`, 'YYYYMMDD'),
           `${item.holiday_cn}假期`,
+          item.holiday,
         ])
       }
     }
+  }
+
+  // 因为每年实际的假期安排一般在11月中发布，下面加一点预设逻辑
+  // 元旦假期的预设逻辑（大概率从01月01日开始）
+  // 春节假期的预设逻辑（大概率从除夕夜开始）
+  const lastMonthInRange = nextHalfYearMonth[nextHalfYearMonth.length - 1]
+
+  let ifyuandan = true
+  const yuandan = lastMonthInRange.clone().set('month', 0).set('date', 1)
+  logger('预计元旦日期:', yuandan.format('YYYY-MM-DD'))
+
+  if (yuandan.isBetween(nextHalfYearMonth[0], lastMonthInRange)) {
+    ifyuandan = false
+
+    for (let i = 0, j = holidayArr.length; i < j; i += 1) {
+      const item = holidayArr[i]
+      if (item[2] === 22) {
+        ifyuandan = true
+        break
+      }
+    }
+  }
+
+  logger('是否包含远端元旦假期:', ifyuandan)
+  if (!ifyuandan) {
+    holidayArr.push([
+      yuandan,
+      `元旦假期`,
+      22,
+    ])
   }
 
   return holidayArr
@@ -157,7 +180,7 @@ async function showOperation (argv) {
   if (nextHoliday.length) {
     nextHoliday.forEach(([date, name]) => {
       const diff = getTimeDiff(today, date)
-      logger('节日:', name, diff)
+      logger('节日:', date.format('YYYY-MM-DD'), name, diff)
       if (diff > 0) {
       text += `
 距离${name}还有${diff}天`
