@@ -186,16 +186,21 @@ async function getHoliday (today) {
 }
 
 async function showOperation (argv) {
-  const today = dayjs('2020-09-11').startOf('day')
+  const date = dayjs()
+  const today = date.startOf('day')
   const todayText = today.format('YYYY-MM-DD dddd')
   console.log(chalk.green('今天是', todayText))
 
   const nextWeekend = await getNextWeekend(today)
   const nextHoliday = await getHoliday(today)
 
+  const hour = date.get('hour')
+  logger('hour:', hour)
+  const state = hour >= 12 ? '下午' : '上午'
+
   let text = `【摸鱼办公室】${today.format('M月D日')}`
   text += `
-上午好，摸鱼人，工作再累，一定不要忘记摸鱼哦！
+${state}好，摸鱼人，工作再累，一定不要忘记摸鱼哦！
 有事没事起身去茶水间去厕所去廊道走走，别老在工位上坐着，钱是老板的，但命是自己的`
 
   if (nextWeekend) {
