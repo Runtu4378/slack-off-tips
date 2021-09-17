@@ -4,7 +4,7 @@
   "description": "摸鱼办公室文案生成器",
   "main": "index.js",
   "bin": {
-    "tips": "./bin/tips.js"
+    "moyu": "./bin/tips.js"
   },
   "scripts": {
     "start": "node ./bin/tips.js show",
