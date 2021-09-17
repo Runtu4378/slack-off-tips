@@ -4,6 +4,7 @@ const yargs = require('yargs')
 const chalk = require('chalk')
 const axios = require('axios')
 const dayjs = require('dayjs')
+const { Lunar } = require('lunar-javascript')
 
 const version = require('../package.json').version
 
@@ -125,13 +126,14 @@ async function getHoliday (today) {
   // 因为每年实际的假期安排一般在11月中发布，下面加一点预设逻辑
   // 元旦假期的预设逻辑（大概率从01月01日开始）
   // 春节假期的预设逻辑（大概率从除夕夜开始）
+  const firstMonthInRange = nextHalfYearMonth[0]
   const lastMonthInRange = nextHalfYearMonth[nextHalfYearMonth.length - 1]
 
   let ifyuandan = true
   const yuandan = lastMonthInRange.clone().set('month', 0).set('date', 1)
   logger('预计元旦日期:', yuandan.format('YYYY-MM-DD'))
 
-  if (yuandan.isBetween(nextHalfYearMonth[0], lastMonthInRange)) {
+  if (yuandan.isBetween(firstMonthInRange, lastMonthInRange)) {
     ifyuandan = false
 
     for (let i = 0, j = holidayArr.length; i < j; i += 1) {
@@ -149,6 +151,33 @@ async function getHoliday (today) {
       yuandan,
       `元旦假期`,
       22,
+    ])
+  }
+
+  let ifSpring = true
+  const spring = Lunar.fromYmd(lastMonthInRange.get('year'), 1, 1).getSolar()
+  logger(spring)
+  const springEve = dayjs(spring.toString(), 'YYYY-MM-DD').subtract(1, 'day')
+  logger('预计除夕日期:', springEve.format('YYYY-MM-DD'))
+
+  if (springEve.isBetween(firstMonthInRange, lastMonthInRange)) {
+    ifSpring = false
+
+    for (let i = 0, j = holidayArr.length; i < j; i += 1) {
+      const item = holidayArr[i]
+      if (item[2] === 11) {
+        ifSpring = true
+        break
+      }
+    }
+  }
+
+  logger('是否包含远端春节假期:', ifSpring)
+  if (!ifSpring) {
+    holidayArr.push([
+      springEve,
+      `春节假期`,
+      11,
     ])
   }
 
