@@ -42,7 +42,7 @@ function getTimeDiff (start, end, unit = 'day') {
 
   switch (unit) {
     case 'day': {
-      diff = end.diff(start, 'day') - 1
+      diff = end.diff(start, 'day')
       break;
     }
   }
@@ -186,7 +186,7 @@ async function getHoliday (today) {
 }
 
 async function showOperation (argv) {
-  const today = dayjs().startOf('day')
+  const today = dayjs('2020-09-11').startOf('day')
   const todayText = today.format('YYYY-MM-DD dddd')
   console.log(chalk.green('今天是', todayText))
 
@@ -202,8 +202,13 @@ async function showOperation (argv) {
     const diff = getTimeDiff(today, nextWeekend)
     logger('下一周末与今天的时间差', diff)
     if (diff > 0) {
-    text += `
-距离本周周末还有${diff}天`
+      if (diff === 1) {
+        text += `
+明天周末`
+      } else {
+        text += `
+距离本周周末还有${diff - 1}天`
+      }
     }
   }
 
@@ -213,7 +218,7 @@ async function showOperation (argv) {
       logger('节日:', date.format('YYYY-MM-DD'), name, diff)
       if (diff > 0) {
       text += `
-距离${name}还有${diff}天`
+距离${name}还有${diff - 1}天`
       }
     })
   }
