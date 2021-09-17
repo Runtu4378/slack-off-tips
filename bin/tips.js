@@ -21,8 +21,9 @@ const API = 'https://api.apihubs.cn/holiday/get'
 const COMMAND_SHOW = 'show'
 
 function logger () {
-  // console.log(typeof arguments)
-  console.log(chalk.yellow(...arguments))
+  if (process.env.tipsDebug) {
+    console.log(chalk.yellow(...arguments))
+  }
 }
 
 function generateDateRange(dateStart, length, unit = 'day') {
