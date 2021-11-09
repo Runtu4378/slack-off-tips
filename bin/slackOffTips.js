@@ -6,9 +6,6 @@ const axios = require('axios');
 const dayjs = require('dayjs');
 const { Lunar } = require('lunar-javascript');
 
-const version = require('../package.json').version;
-const logger = require('./logger');
-
 require('dayjs/locale/zh-cn');
 dayjs.locale('zh-cn');
 
@@ -18,9 +15,9 @@ dayjs.extend(customParseFormat);
 var isBetween = require('dayjs/plugin/isBetween');
 dayjs.extend(isBetween);
 
-// docs: https://blog.csdn.net/u012981882/article/details/112552450
-const API = 'https://api.apihubs.cn/holiday/get';
-const COMMAND_SHOW = 'show';
+const version = require('../package.json').version;
+const logger = require('./logger');
+const constant = require('./constant');
 
 function generateDateRange(dateStart, length, unit = 'day') {
   const result = [dateStart];
@@ -55,7 +52,7 @@ async function getNextWeekend(today) {
     i.format('YYYYMMDD')
   );
   logger('获取下一周末的日期范围', nextWeekendDate);
-  const resp = await axios.get(API, {
+  const resp = await axios.get(constant.API, {
     params: {
       // 日期范围
       date: nextWeekendDate.join(','),
@@ -90,7 +87,7 @@ async function getHoliday(today) {
   const nextHalfYearMonth = generateDateRange(today, 6, 'month');
   const month = nextHalfYearMonth.map((i) => i.format('YYYYMM'));
   logger('获取下半年假日的日期范围', month);
-  const resp = await axios.get(API, {
+  const resp = await axios.get(constant.API, {
     params: {
       // 日期范围
       month: month.join(','),
@@ -175,7 +172,7 @@ async function getHoliday(today) {
   return holidayArr;
 }
 
-async function showOperation(argv) {
+async function showOperation() {
   const date = dayjs();
   const today = date.startOf('day');
   const todayText = today.format('YYYY-MM-DD dddd');
@@ -227,7 +224,7 @@ function operation(command, argv) {
     process.env.tipsDebug = true;
   }
 
-  if (command === COMMAND_SHOW) {
+  if (command === constant.COMMAND_SHOW) {
     showOperation(argv);
   } else {
     console.log(chalk.red('无效的指令'));
@@ -242,10 +239,10 @@ function initCommand() {
 
   // 生成摸鱼文案
   yargs.command(
-    COMMAND_SHOW,
+    constant.COMMAND_SHOW,
     '生成今天的摸鱼文案',
     () => {},
-    (argv) => operation(COMMAND_SHOW, argv)
+    (argv) => operation(constant.COMMAND_SHOW, argv)
   );
 }
 
