@@ -105,9 +105,10 @@ function markOperation(date, name) {
     '# 这是存放 npm 模块 slack-off-tips 的用户自定义节日锚点的数据文件'
   );
   setDBContent(contentToSave.join(DB_RECORD_DIVISION));
-  console.log(chalk.yellow('保存成功'));
+  console.log(chalk.yellow('保存成功:', DB_PATH));
 }
 
 module.exports = {
+  getFormattedDBContent,
   markOperation,
 };

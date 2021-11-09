@@ -14,6 +14,7 @@ dayjs.extend(isBetween);
 
 const logger = require('./logger');
 const constant = require('./constant');
+const { getFormattedDBContent } = require('./mark');
 
 function generateDateRange(dateStart, length, unit = 'day') {
   const result = [dateStart];
@@ -177,6 +178,20 @@ async function showOperation() {
   const nextWeekend = await getNextWeekend(today);
   const nextHoliday = await getHoliday(today);
 
+  // 插入自定义节日锚点
+  const markArr = getFormattedDBContent().map((i) => [
+    dayjs(i[0], constant.MARK_DATE_FORMAT),
+    i[1],
+  ]);
+  const fullHolidayArr = []
+    .concat(nextHoliday, markArr)
+    .sort((before, next) => {
+      const beforeTS = before[0].unix();
+      const nextTS = next[0].unix();
+
+      return beforeTS - nextTS;
+    });
+
   const hour = date.get('hour');
   logger.info('hour:', hour);
   const state = hour >= 12 ? '下午' : '上午';
@@ -200,8 +215,8 @@ ${state}好，摸鱼人，工作再累，一定不要忘记摸鱼哦！
     }
   }
 
-  if (nextHoliday.length) {
-    nextHoliday.forEach(([date, name]) => {
+  if (fullHolidayArr.length) {
+    fullHolidayArr.forEach(([date, name]) => {
       const diff = getTimeDiff(today, date);
       logger.info('节日:', date.format('YYYY-MM-DD'), name, diff);
       if (diff > 0) {
