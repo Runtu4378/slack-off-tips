@@ -4,10 +4,10 @@
   "description": "摸鱼办公室文案生成器",
   "main": "index.js",
   "bin": {
-    "moyu": "./bin/slackOffTips.js.js"
+    "moyu": "./bin/slackOffTips.js"
   },
   "scripts": {
-    "start": "node ./bin/slackOffTips.js.js show",
+    "start": "node ./bin/slackOffTips.js show",
     "test": "jest"
   },
   "repository": {
