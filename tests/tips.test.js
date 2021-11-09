@@ -1,6 +1,6 @@
 const dayjs = require('dayjs');
 
-const { generateDateRange, getTimeDiff } = require('../bin/slackOffTips');
+const { generateDateRange, getTimeDiff } = require('../bin/show');
 
 test('generateDateRange: 2 day', () => {
   const today = dayjs('20211011', 'YYYYMMDD');
