@@ -47,7 +47,7 @@ async function getNextWeekend(today) {
   const nextWeekendDate = generateDateRange(today, 10, 'day').map((i) =>
     i.format('YYYYMMDD')
   );
-  logger('获取下一周末的日期范围', nextWeekendDate);
+  logger.info('获取下一周末的日期范围', nextWeekendDate);
   const resp = await axios.get(constant.API, {
     params: {
       // 日期范围
@@ -63,14 +63,14 @@ async function getNextWeekend(today) {
   if (resp.status === 200 && resp.data.code === '0') {
     const weekendList = resp.data.data.list;
     if (!weekendList.length) {
-      logger('查询不到下一周末');
+      logger.info('查询不到下一周末');
     } else {
       // 入参必须要字符化
       nextWeekend = dayjs(`${weekendList[0].date}`, 'YYYYMMDD');
-      logger('下一周末:', weekendList[0].date);
+      logger.info('下一周末:', weekendList[0].date);
     }
   } else {
-    logger('网络出错');
+    logger.error('网络出错');
   }
 
   return nextWeekend;
@@ -82,7 +82,7 @@ async function getHoliday(today) {
 
   const nextHalfYearMonth = generateDateRange(today, 6, 'month');
   const month = nextHalfYearMonth.map((i) => i.format('YYYYMM'));
-  logger('获取下半年假日的日期范围', month);
+  logger.info('获取下半年假日的日期范围', month);
   const resp = await axios.get(constant.API, {
     params: {
       // 日期范围
@@ -123,7 +123,7 @@ async function getHoliday(today) {
 
   let ifyuandan = true;
   const yuandan = lastMonthInRange.clone().set('month', 0).set('date', 1);
-  logger('预计元旦日期:', yuandan.format('YYYY-MM-DD'));
+  logger.info('预计元旦日期:', yuandan.format('YYYY-MM-DD'));
 
   if (yuandan.isBetween(firstMonthInRange, lastMonthInRange)) {
     ifyuandan = false;
@@ -137,16 +137,16 @@ async function getHoliday(today) {
     }
   }
 
-  logger('是否包含远端元旦假期:', ifyuandan);
+  logger.info('是否包含远端元旦假期:', ifyuandan);
   if (!ifyuandan) {
     holidayArr.push([yuandan, `元旦假期`, 22]);
   }
 
   let ifSpring = true;
   const spring = Lunar.fromYmd(lastMonthInRange.get('year'), 1, 1).getSolar();
-  logger(spring);
+  logger.info(spring);
   const springEve = dayjs(spring.toString(), 'YYYY-MM-DD').subtract(1, 'day');
-  logger('预计除夕日期:', springEve.format('YYYY-MM-DD'));
+  logger.info('预计除夕日期:', springEve.format('YYYY-MM-DD'));
 
   if (springEve.isBetween(firstMonthInRange, lastMonthInRange)) {
     ifSpring = false;
@@ -160,7 +160,7 @@ async function getHoliday(today) {
     }
   }
 
-  logger('是否包含远端春节假期:', ifSpring);
+  logger.info('是否包含远端春节假期:', ifSpring);
   if (!ifSpring) {
     holidayArr.push([springEve, `春节假期`, 11]);
   }
@@ -178,7 +178,7 @@ async function showOperation() {
   const nextHoliday = await getHoliday(today);
 
   const hour = date.get('hour');
-  logger('hour:', hour);
+  logger.info('hour:', hour);
   const state = hour >= 12 ? '下午' : '上午';
 
   let text = `【摸鱼办公室】${today.format('M月D日')}`;
@@ -188,7 +188,7 @@ ${state}好，摸鱼人，工作再累，一定不要忘记摸鱼哦！
 
   if (nextWeekend) {
     const diff = getTimeDiff(today, nextWeekend);
-    logger('下一周末与今天的时间差', diff);
+    logger.info('下一周末与今天的时间差', diff);
     if (diff > 0) {
       if (diff === 1) {
         text += `
@@ -203,7 +203,7 @@ ${state}好，摸鱼人，工作再累，一定不要忘记摸鱼哦！
   if (nextHoliday.length) {
     nextHoliday.forEach(([date, name]) => {
       const diff = getTimeDiff(today, date);
-      logger('节日:', date.format('YYYY-MM-DD'), name, diff);
+      logger.info('节日:', date.format('YYYY-MM-DD'), name, diff);
       if (diff > 0) {
         text += `
 距离${name}还有${diff - 1}天`;
