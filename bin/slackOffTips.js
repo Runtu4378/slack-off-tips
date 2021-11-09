@@ -7,6 +7,7 @@ const dayjs = require('dayjs');
 const { Lunar } = require('lunar-javascript');
 
 const version = require('../package.json').version;
+const logger = require('./logger');
 
 require('dayjs/locale/zh-cn');
 dayjs.locale('zh-cn');
@@ -20,12 +21,6 @@ dayjs.extend(isBetween);
 // docs: https://blog.csdn.net/u012981882/article/details/112552450
 const API = 'https://api.apihubs.cn/holiday/get';
 const COMMAND_SHOW = 'show';
-
-function logger() {
-  if (process.env.tipsDebug) {
-    console.log(chalk.yellow(...arguments));
-  }
-}
 
 function generateDateRange(dateStart, length, unit = 'day') {
   const result = [dateStart];
