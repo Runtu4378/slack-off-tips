@@ -57,7 +57,7 @@ yargs.usage(
   Usage: moyu [command] [options] 例如:
   # 显示今天的摸鱼文案
   moyu show
-  # 增加圣诞节锚点
+  # 增加自定义节日锚点
   moyu mark 2021-12-25 圣诞节`
 );
 

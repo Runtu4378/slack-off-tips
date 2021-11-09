@@ -21,6 +21,8 @@
 # 安装
 npm i -g https://github.com/Runtu4378/slack-off-tips
 
-# 生成今天的文案
-moyu show 
+# 显示今天的摸鱼文案
+moyu show
+# 增加自定义节日锚点
+moyu mark 2021-12-25 圣诞节`
 ```
