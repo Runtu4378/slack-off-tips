@@ -1,5 +1,5 @@
 const chalk = require('chalk');
-const axios = require('axios');
+const axios = require('axios').default;
 const { Lunar } = require('lunar-javascript');
 const dayjs = require('dayjs');
 
@@ -49,7 +49,10 @@ async function getNextWeekend(today) {
     i.format('YYYYMMDD')
   );
   logger.info('获取下一周末的日期范围', nextWeekendDate);
-  const resp = await axios.get(constant.API, {
+
+  const options = {
+    method: 'get',
+    url: constant.API,
     params: {
       // 日期范围
       date: nextWeekendDate.join(','),
@@ -60,8 +63,17 @@ async function getNextWeekend(today) {
       // 中文描述
       cn: 1,
     },
-  });
-  if (resp.status === 200 && resp.data.code === '0') {
+  };
+  const fullUri = axios.getUri(options);
+  logger.info('接口参数：', JSON.stringify(options));
+  logger.info('接口全文：', fullUri);
+
+  const resp = await axios(options);
+  logger.info(`接口返回：
+status：${resp.status}
+data：${JSON.stringify(resp.data)}
+`);
+  if (resp.status === 200 && String(resp.data.code) === '0') {
     const weekendList = resp.data.data.list;
     if (!weekendList.length) {
       logger.info('查询不到下一周末');
@@ -84,7 +96,10 @@ async function getHoliday(today) {
   const nextHalfYearMonth = generateDateRange(today, 6, 'month');
   const month = nextHalfYearMonth.map((i) => i.format('YYYYMM'));
   logger.info('获取下半年假日的日期范围', month);
-  const resp = await axios.get(constant.API, {
+
+  const options = {
+    method: 'get',
+    url: constant.API,
     params: {
       // 日期范围
       month: month.join(','),
@@ -95,9 +110,18 @@ async function getHoliday(today) {
       // 中文描述
       cn: 1,
     },
-  });
+  };
+  const fullUri = axios.getUri(options);
+  logger.info('接口参数：', JSON.stringify(options));
+  logger.info('接口全文：', fullUri);
 
-  if (resp.status === 200 && resp.data.code === '0') {
+  const resp = await axios(options);
+  logger.info(`接口返回：
+status：${resp.status}
+data：${JSON.stringify(resp.data)}
+`);
+
+  if (resp.status === 200 && String(resp.data.code) === '0') {
     const baseArr = resp.data.data.list;
     let holidayAnchor;
 
