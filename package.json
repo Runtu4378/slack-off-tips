@@ -1,6 +1,6 @@
 {
   "name": "slack-off-tips",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "摸鱼办公室文案生成器",
   "main": "index.js",
   "bin": {
